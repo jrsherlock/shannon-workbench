@@ -1,13 +1,73 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "sqlite"
+}
+
+model Engagement {
+  id          String   @id @default(cuid())
+  name        String
+  clientName  String
+  targetUrl   String
+  repoPath    String
+  description String   @default("")
+  threatModel String   @default("")
+  notes       String   @default("")
+  status      String   @default("active")
+  runs        Run[]
+  findings    Finding[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Run {
+  id              String     @id @default(cuid())
+  engagementId    String
+  engagement      Engagement @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+  workflowId      String     @unique
+  sessionId       String
+  configYAML      String
+  status          String     @default("running")
+  currentPhase    String?
+  currentAgent    String?
+  completedAgents String     @default("[]")
+  totalCostUsd    Float      @default(0)
+  totalDurationMs Int        @default(0)
+  agentMetrics    String     @default("{}")
+  errorMessage    String?
+  findings        Finding[]
+  startedAt       DateTime   @default(now())
+  completedAt     DateTime?
+}
+
+model Finding {
+  id           String     @id @default(cuid())
+  engagementId String
+  engagement   Engagement @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+  runId        String?
+  run          Run?       @relation(fields: [runId], references: [id], onDelete: SetNull)
+  shannonId    String?
+  source       String     @default("shannon")
+  category     String     @default("other")
+  title        String
+  severity     String     @default("medium")
+  description  String     @default("")
+  poc          String     @default("")
+  codeLocation String     @default("")
+  remediation  String     @default("")
+  testerNotes  String     @default("")
+  status       String     @default("needs-review")
+  cvss         Float?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model ConfigTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  description String   @default("")
+  configYAML  String
+  createdAt   DateTime @default(now())
 }
