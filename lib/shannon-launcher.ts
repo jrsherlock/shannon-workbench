@@ -2,7 +2,6 @@ import { execFile } from "child_process";
 import { writeFile, unlink } from "fs/promises";
 import { join } from "path";
 import { promisify } from "util";
-import { randomBytes } from "crypto";
 
 const execFileAsync = promisify(execFile);
 
@@ -31,26 +30,30 @@ export async function launchShannonRun(params: {
 }): Promise<LaunchResult> {
   const { webUrl, repoPath, configYAML, sessionId } = params;
 
-  // Write config to a temp file
-  const tmpPath = join("/tmp", `shannon-config-${randomBytes(8).toString("hex")}.yaml`);
-  await writeFile(tmpPath, configYAML, "utf8");
+  // Write config to a stable path keyed by sessionId. The file must persist
+  // because Shannon's Docker worker reads it asynchronously after the CLI
+  // returns, and resume needs the same config available again.
+  const configPath = join("/tmp", `shannon-config-${sessionId}.yaml`);
+  await writeFile(configPath, configYAML, "utf8");
 
   const { bin, prefix } = shannonCmd();
 
-  try {
-    const { stdout, stderr } = await execFileAsync(
-      bin,
-      [...prefix, "start", "-u", webUrl, "-r", repoPath, "-c", tmpPath, "-w", sessionId],
-      { timeout: 60_000 }
-    );
+  const { stdout, stderr } = await execFileAsync(
+    bin,
+    [...prefix, "start", "-u", webUrl, "-r", repoPath, "-c", configPath, "-w", sessionId],
+    { timeout: 60_000 },
+  );
 
-    const output = stdout + stderr;
-    const workflowId = parseWorkflowId(output, sessionId);
+  const output = stdout + stderr;
+  const workflowId = parseWorkflowId(output, sessionId);
 
-    return { workflowId, sessionId };
-  } finally {
-    await unlink(tmpPath).catch(() => null);
-  }
+  return { workflowId, sessionId };
+}
+
+/** Clean up the config file after a run reaches a terminal status. */
+export async function cleanupRunConfig(sessionId: string): Promise<void> {
+  const configPath = join("/tmp", `shannon-config-${sessionId}.yaml`);
+  await unlink(configPath).catch(() => null);
 }
 
 function parseWorkflowId(output: string, sessionId: string): string {
