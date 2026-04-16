@@ -144,6 +144,13 @@ prisma/
   schema.prisma           # Engagement, Run, Finding, ConfigTemplate models
 ```
 
+## Roadmap
+
+- **Black-box mode support** — Shannon also supports black-box scanning (no source code required), using only a target URL. The Workbench currently requires a repo path for white-box scans. A future release will let testers choose between white-box and black-box modes in the config wizard, making the tool useful for external assessments where source access isn't available.
+- **Finding diff across runs** — Compare findings between runs to track what's new, fixed, or regressed
+- **Report generation** — Export to PDF/Markdown pentest report templates, not just raw JSON
+- **CI/CD integration** — Trigger scans from GitHub Actions or other pipelines and post results back as PR comments
+
 ## License
 
 MIT
