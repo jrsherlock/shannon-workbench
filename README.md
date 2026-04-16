@@ -2,6 +2,32 @@
 
 An engagement management UI for [Shannon](https://github.com/KeygraphHQ/shannon), Keygraph's autonomous AI pentester. Shannon Workbench gives AppSec testers a structured workflow around Shannon's automated scanning: configure, launch, monitor, triage, and export — all from a single dashboard.
 
+## What is Shannon?
+
+[Shannon](https://github.com/KeygraphHQ/shannon) is an autonomous, white-box AI pentester built by [Keygraph](https://keygraph.io). It combines source code analysis with live exploitation using a **13-agent pipeline** orchestrated by Temporal, running inside Docker. Each scan progresses through five phases:
+
+**Phase 1 — Pre-Reconnaissance** (`pre-recon`): External scanning with nmap, subfinder, and whatweb to fingerprint the target's infrastructure. Simultaneously analyzes the source code to identify frameworks, entry points, and potential attack surface.
+
+**Phase 2 — Reconnaissance** (`recon`): Builds a comprehensive attack surface map by correlating code-level insights with live browser exploration of the running application. Produces a detailed inventory of API endpoints, authentication mechanisms, and input vectors.
+
+**Phase 3 — Vulnerability Analysis** (5 parallel agents): Specialized agents hunt for vulnerabilities concurrently, each focused on one OWASP category:
+- `injection-vuln` — SQL injection, command injection, template injection via data flow analysis from user input to dangerous sinks
+- `xss-vuln` — Reflected and DOM-based cross-site scripting
+- `auth-vuln` — Broken authentication: weak JWT implementations, credential stuffing, session fixation
+- `ssrf-vuln` — Server-side request forgery via URL parameters, file uploads, webhooks
+- `authz-vuln` — Broken access control: horizontal/vertical privilege escalation, IDOR, missing function-level checks
+
+Each agent produces a list of **hypothesized exploitable paths** — not confirmed vulnerabilities yet.
+
+**Phase 4 — Exploitation** (5 parallel agents): Dedicated exploit agents receive the hypotheses and attempt real-world attacks using browser automation and CLI tools:
+- `injection-exploit`, `xss-exploit`, `auth-exploit`, `ssrf-exploit`, `authz-exploit`
+
+Shannon enforces a strict **"No Exploit, No Report"** policy — if a hypothesis can't be proven with a working PoC, it's discarded as a false positive.
+
+**Phase 5 — Reporting** (`report`): Consolidates all validated findings into a structured report with reproducible, copy-paste proof-of-concept exploits.
+
+The Workbench monitors all 13 agents in real time through Shannon's Temporal `getProgress` query, showing per-agent cost, duration, and status as each phase completes.
+
 ## Why This Exists
 
 Shannon finds vulnerabilities fast. But a pentest isn't just a scan — it's an engagement with scope, context, client expectations, and findings that need human judgment before they go into a report. Shannon Workbench bridges that gap.
