@@ -12,6 +12,20 @@ Shannon finds vulnerabilities fast. But a pentest isn't just a scan — it's an 
 - **During the scan:** Monitor agent progress, costs, and elapsed time in real time — stop and resume from checkpoints
 - **After the scan:** Triage findings with severity/status workflows, add your own manual findings alongside Shannon's, then export a clean JSON deliverable
 
+## Screenshots
+
+**Dashboard** — engagement overview with run counts and finding totals
+![Dashboard](docs/mockups/dashboard.png)
+
+**Run Monitor** — live SSE-driven view of Shannon's 13-agent pipeline
+![Run Monitor](docs/mockups/run-monitor.png)
+
+**Findings Triage** — two-panel UI with filters, inline editing, and auto-save
+![Findings Triage](docs/mockups/findings-triage.png)
+
+**Export** — filter by status, preview JSON, download
+![Export](docs/mockups/export.png)
+
 ## Features
 
 - **Engagement lifecycle** — Create, edit, and track pentest engagements with client info, target URLs, threat models, and notes

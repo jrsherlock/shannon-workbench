@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shannon Workbench — Screen Mockups</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0f0f14; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; color: #e2e8f0; }
+  .screen-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: #0f0f14; border-bottom: 1px solid #1e293b; display: flex; gap: 2px; padding: 8px 16px; }
+  .screen-nav button { background: #1e293b; border: 1px solid #334155; color: #94a3b8; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; }
+  .screen-nav button.active { background: #7c3aed; border-color: #7c3aed; color: #fff; }
+  .screen { display: none; margin-top: 52px; }
+  .screen.active { display: block; }
+
+  /* Shared layout */
+  .page { display: flex; min-height: 100vh; }
+  .sidebar { width: 220px; background: #0f172a; border-right: 1px solid #1e293b; padding: 20px 0; flex-shrink: 0; }
+  .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 0 20px 24px; border-bottom: 1px solid #1e293b; margin-bottom: 16px; }
+  .sidebar-logo .icon { width: 28px; height: 28px; background: #7c3aed; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; }
+  .sidebar-logo span { font-size: 15px; font-weight: 600; color: #f1f5f9; }
+  .sidebar-logo small { display: block; font-size: 11px; color: #64748b; font-weight: 400; }
+  .sidebar-link { display: flex; align-items: center; gap: 10px; padding: 8px 20px; font-size: 13px; color: #94a3b8; text-decoration: none; }
+  .sidebar-link.active { color: #f1f5f9; background: #1e293b; }
+  .sidebar-link svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+  .main { flex: 1; background: #020617; }
+
+  /* Header bar */
+  .header { border-bottom: 1px solid #1e293b; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .header h1 { font-size: 18px; font-weight: 600; }
+  .header-sub { font-size: 13px; color: #64748b; margin-top: 2px; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; }
+  .btn-primary { background: #7c3aed; color: #fff; }
+  .btn-ghost { background: transparent; color: #94a3b8; border: 1px solid #334155; }
+
+  /* Stats row */
+  .stats { display: flex; gap: 16px; padding: 24px 32px; }
+  .stat-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; padding: 16px 20px; flex: 1; }
+  .stat-label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+  .stat-value { font-size: 28px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .stat-sub { font-size: 12px; color: #64748b; margin-top: 2px; }
+
+  /* Table */
+  .table-wrap { background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; margin: 0 32px 24px; overflow: hidden; }
+  .table-header { padding: 12px 20px; border-bottom: 1px solid #1e293b; display: flex; align-items: center; justify-content: space-between; }
+  .table-header h2 { font-size: 14px; font-weight: 500; color: #e2e8f0; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 10px 20px; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; border-bottom: 1px solid #1e293b; }
+  td { padding: 12px 20px; font-size: 13px; color: #cbd5e1; border-bottom: 1px solid #1e293b; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(30, 41, 59, 0.4); }
+
+  /* Badges */
+  .badge { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 500; border: 1px solid; }
+  .badge-critical { background: rgba(239,68,68,0.1); color: #f87171; border-color: rgba(239,68,68,0.3); }
+  .badge-high { background: rgba(249,115,22,0.1); color: #fb923c; border-color: rgba(249,115,22,0.3); }
+  .badge-medium { background: rgba(234,179,8,0.1); color: #facc15; border-color: rgba(234,179,8,0.3); }
+  .badge-low { background: rgba(96,165,250,0.1); color: #60a5fa; border-color: rgba(96,165,250,0.3); }
+  .badge-info { background: rgba(148,163,184,0.1); color: #94a3b8; border-color: rgba(148,163,184,0.3); }
+  .badge-confirmed { background: rgba(34,197,94,0.1); color: #4ade80; }
+  .badge-needs-review { background: rgba(234,179,8,0.1); color: #facc15; }
+  .badge-dismissed { background: rgba(148,163,184,0.1); color: #94a3b8; }
+  .badge-running { background: rgba(34,197,94,0.1); color: #4ade80; border-color: rgba(34,197,94,0.3); }
+  .badge-completed { background: rgba(96,165,250,0.1); color: #60a5fa; border-color: rgba(96,165,250,0.3); }
+  .badge-active { background: rgba(34,197,94,0.1); color: #4ade80; border-color: rgba(34,197,94,0.3); }
+  .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+  .dot-critical { background: #ef4444; }
+  .dot-high { background: #f97316; }
+  .dot-medium { background: #eab308; }
+  .dot-low { background: #60a5fa; }
+  .dot-info { background: #94a3b8; }
+  .dot-green { background: #22c55e; }
+
+  /* Progress bar */
+  .progress-bar { height: 6px; background: #1e293b; border-radius: 99px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #7c3aed; border-radius: 99px; }
+
+  /* Monitor layout */
+  .monitor-grid { display: grid; grid-template-columns: 1fr 320px; gap: 24px; padding: 24px 32px; }
+  .monitor-panel { background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; padding: 20px; }
+  .phase-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; }
+  .phase-icon { width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 10px; }
+  .phase-done { background: rgba(34,197,94,0.2); color: #4ade80; }
+  .phase-active { background: rgba(124,58,237,0.2); }
+  .phase-active-dot { width: 8px; height: 8px; border-radius: 50%; background: #a78bfa; animation: pulse 1.5s infinite; }
+  .phase-pending { background: #1e293b; }
+  .phase-label { font-size: 13px; }
+  .phase-label-active { color: #f1f5f9; font-weight: 500; }
+  .phase-label-done { color: #cbd5e1; }
+  .phase-label-pending { color: #475569; }
+  .phase-meta { margin-left: auto; font-size: 11px; color: #475569; font-variant-numeric: tabular-nums; }
+  .agent-list { margin-left: 24px; border-left: 1px solid #1e293b; padding-left: 16px; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  /* Triage layout */
+  .triage-layout { display: flex; flex: 1; min-height: 0; }
+  .finding-list { width: 400px; border-right: 1px solid #1e293b; overflow-y: auto; flex-shrink: 0; }
+  .finding-item { padding: 12px 20px; border-bottom: 1px solid #1e293b; cursor: pointer; }
+  .finding-item:hover { background: rgba(15, 23, 42, 0.8); }
+  .finding-item.selected { background: rgba(30, 41, 59, 0.6); }
+  .finding-title { font-size: 13px; color: #e2e8f0; margin-top: 4px; }
+  .finding-meta { font-size: 10px; color: #475569; margin-top: 4px; }
+  .detail-panel { flex: 1; overflow-y: auto; padding: 24px; }
+  .detail-title { font-size: 20px; font-weight: 600; color: #f1f5f9; margin-bottom: 16px; }
+  .detail-section { margin-bottom: 20px; }
+  .detail-label { font-size: 11px; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .detail-text { font-size: 13px; color: #cbd5e1; line-height: 1.6; }
+  .code-block { background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 16px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; color: #cbd5e1; white-space: pre-wrap; line-height: 1.6; overflow-x: auto; }
+  .filter-bar { border-bottom: 1px solid #1e293b; padding: 10px 32px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .filter-label { font-size: 11px; color: #475569; }
+  .filter-chip { padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 500; cursor: pointer; border: 1px solid #1e293b; color: #475569; }
+  .filter-chip.active { border-color: transparent; }
+  .divider-v { width: 1px; height: 20px; background: #1e293b; }
+
+  /* Export */
+  .export-section { padding: 24px 32px; }
+  .export-section > * + * { margin-top: 20px; }
+  .checkbox-row { display: flex; gap: 20px; }
+  .checkbox-row label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #cbd5e1; cursor: pointer; }
+  .checkbox-row input[type="checkbox"] { accent-color: #7c3aed; }
+  .json-preview { background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; overflow: hidden; }
+  .json-header { padding: 10px 16px; border-bottom: 1px solid #1e293b; font-size: 11px; color: #64748b; font-weight: 500; }
+  .json-body { padding: 16px; font-family: 'SF Mono', Monaco, monospace; font-size: 11px; color: #94a3b8; white-space: pre; overflow-x: auto; max-height: 400px; line-height: 1.5; }
+
+  .mono { font-family: 'SF Mono', Monaco, monospace; }
+  .text-right { text-align: right; }
+  .text-muted { color: #64748b; }
+  .flex-center { display: flex; align-items: center; gap: 6px; }
+
+  /* Footer */
+  .footer-bar { border-top: 1px solid #1e293b; padding: 12px 32px; display: flex; align-items: center; gap: 12px; }
+</style>
+</head>
+<body>
+
+<div class="screen-nav">
+  <button class="active" onclick="show(0)">Dashboard</button>
+  <button onclick="show(1)">Run Monitor</button>
+  <button onclick="show(2)">Findings Triage</button>
+  <button onclick="show(3)">Export</button>
+</div>
+
+<!-- ========== SCREEN 1: DASHBOARD ========== -->
+<div class="screen active" id="s0">
+<div class="page">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="icon">S</div>
+      <div><span>Shannon</span><small>Workbench</small></div>
+    </div>
+    <a class="sidebar-link active" href="#">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a class="sidebar-link" href="#">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      Engagements
+    </a>
+  </div>
+  <div class="main">
+    <div class="header">
+      <h1>Dashboard</h1>
+      <button class="btn btn-primary">+ New Engagement</button>
+    </div>
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-label">Total Engagements</div>
+        <div class="stat-value">3</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Active Runs</div>
+        <div class="stat-value" style="color: #4ade80;">1</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Findings</div>
+        <div class="stat-value">47</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Critical / High</div>
+        <div class="stat-value" style="color: #f87171;">8 <span style="color: #64748b; font-size: 14px; font-weight: 400;">/ 14</span></div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-header">
+        <h2>Engagements</h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Client</th>
+            <th>Target</th>
+            <th>Status</th>
+            <th>Runs</th>
+            <th>Findings</th>
+            <th class="text-right">Updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight: 500; color: #f1f5f9;">Juice Shop Pentest</td>
+            <td>OWASP Foundation</td>
+            <td class="mono" style="font-size: 12px; color: #64748b;">host.docker.internal:3000</td>
+            <td><span class="badge badge-completed"><span class="dot dot-green"></span> Completed</span></td>
+            <td>2</td>
+            <td style="font-weight: 600;">23</td>
+            <td class="text-right text-muted">Apr 15, 2026</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 500; color: #f1f5f9;">Q2 API Assessment</td>
+            <td>Acme Corp</td>
+            <td class="mono" style="font-size: 12px; color: #64748b;">staging.acme-api.com</td>
+            <td><span class="badge badge-running"><span class="dot dot-green" style="animation: pulse 1.5s infinite;"></span> Active</span></td>
+            <td>1</td>
+            <td style="font-weight: 600;">18</td>
+            <td class="text-right text-muted">Apr 15, 2026</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 500; color: #f1f5f9;">Mobile BFF Review</td>
+            <td>Fintech Inc</td>
+            <td class="mono" style="font-size: 12px; color: #64748b;">bff.fintech-staging.io</td>
+            <td><span class="badge" style="background: rgba(148,163,184,0.1); color: #94a3b8; border-color: rgba(148,163,184,0.3);">Archived</span></td>
+            <td>3</td>
+            <td style="font-weight: 600;">6</td>
+            <td class="text-right text-muted">Apr 8, 2026</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ========== SCREEN 2: RUN MONITOR ========== -->
+<div class="screen" id="s1">
+<div class="page">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="icon">S</div>
+      <div><span>Shannon</span><small>Workbench</small></div>
+    </div>
+    <a class="sidebar-link" href="#">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a class="sidebar-link active" href="#">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      Engagements
+    </a>
+  </div>
+  <div class="main" style="display: flex; flex-direction: column;">
+    <div class="header">
+      <div>
+        <div class="flex-center">
+          <h1>Run Monitor</h1>
+          <span class="badge badge-running" style="margin-left: 8px;"><span class="dot dot-green" style="animation: pulse 1.5s infinite;"></span> Running</span>
+        </div>
+        <div class="header-sub">
+          <span class="mono" style="font-size: 11px; color: #475569;">js-pentest_shannon-1776275402052</span>
+          &middot; Apr 15, 2026, 2:30:04 PM &middot; <span style="font-variant-numeric: tabular-nums;">1h 47m 22s</span>
+        </div>
+      </div>
+    </div>
+    <div class="monitor-grid" style="flex: 1;">
+      <!-- Phase timeline -->
+      <div class="monitor-panel">
+        <h2 style="font-size: 14px; font-weight: 500; margin-bottom: 16px;">Pipeline Progress</h2>
+
+        <div class="phase-item">
+          <div class="phase-icon phase-done">&#10003;</div>
+          <span class="phase-label phase-label-done">Pre-Recon</span>
+          <span class="phase-meta">$3.56 &middot; 11m 34s</span>
+        </div>
+        <div class="phase-item">
+          <div class="phase-icon phase-done">&#10003;</div>
+          <span class="phase-label phase-label-done">Recon</span>
+          <span class="phase-meta">$2.91 &middot; 12m 16s</span>
+        </div>
+
+        <div class="phase-item">
+          <div class="phase-icon phase-active"><div class="phase-active-dot"></div></div>
+          <span class="phase-label phase-label-active">Vulnerability Analysis</span>
+        </div>
+        <div class="agent-list">
+          <div class="phase-item">
+            <div class="phase-icon phase-done" style="width: 14px; height: 14px; font-size: 8px;">&#10003;</div>
+            <span class="phase-label phase-label-done" style="font-size: 12px;">Injection Vuln</span>
+            <span class="phase-meta">$4.12 &middot; 18m 42s</span>
+          </div>
+          <div class="phase-item">
+            <div class="phase-icon phase-done" style="width: 14px; height: 14px; font-size: 8px;">&#10003;</div>
+            <span class="phase-label phase-label-done" style="font-size: 12px;">XSS Vuln</span>
+            <span class="phase-meta">$3.87 &middot; 16m 08s</span>
+          </div>
+          <div class="phase-item">
+            <div class="phase-icon phase-active" style="width: 14px; height: 14px;"><div class="phase-active-dot" style="width: 6px; height: 6px;"></div></div>
+            <span class="phase-label phase-label-active" style="font-size: 12px;">Auth Vuln</span>
+          </div>
+          <div class="phase-item">
+            <div class="phase-icon phase-pending" style="width: 14px; height: 14px;"></div>
+            <span class="phase-label phase-label-pending" style="font-size: 12px;">SSRF Vuln</span>
+          </div>
+          <div class="phase-item">
+            <div class="phase-icon phase-pending" style="width: 14px; height: 14px;"></div>
+            <span class="phase-label phase-label-pending" style="font-size: 12px;">AuthZ Vuln</span>
+          </div>
+        </div>
+
+        <div class="phase-item">
+          <div class="phase-icon phase-pending"></div>
+          <span class="phase-label phase-label-pending">Exploitation</span>
+        </div>
+        <div class="agent-list">
+          <div class="phase-item"><div class="phase-icon phase-pending" style="width: 14px; height: 14px;"></div><span class="phase-label phase-label-pending" style="font-size: 12px;">Injection Exploit</span></div>
+          <div class="phase-item"><div class="phase-icon phase-pending" style="width: 14px; height: 14px;"></div><span class="phase-label phase-label-pending" style="font-size: 12px;">XSS Exploit</span></div>
+          <div class="phase-item"><div class="phase-icon phase-pending" style="width: 14px; height: 14px;"></div><span class="phase-label phase-label-pending" style="font-size: 12px;">Auth Exploit</span></div>
+          <div class="phase-item"><div class="phase-icon phase-pending" style="width: 14px; height: 14px;"></div><span class="phase-label phase-label-pending" style="font-size: 12px;">SSRF Exploit</span></div>
+          <div class="phase-item"><div class="phase-icon phase-pending" style="width: 14px; height: 14px;"></div><span class="phase-label phase-label-pending" style="font-size: 12px;">AuthZ Exploit</span></div>
+        </div>
+
+        <div class="phase-item">
+          <div class="phase-icon phase-pending"></div>
+          <span class="phase-label phase-label-pending">Reporting</span>
+        </div>
+      </div>
+
+      <!-- Stats panel -->
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div class="monitor-panel">
+          <div class="stat-label">Running Cost</div>
+          <div style="font-size: 28px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums;">$14.46</div>
+        </div>
+        <div class="monitor-panel">
+          <div class="stat-label">Agents Complete</div>
+          <div style="font-size: 28px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums;">4 <span style="font-size: 14px; color: #64748b; font-weight: 400;">/ 13</span></div>
+          <div class="progress-bar" style="margin-top: 12px;">
+            <div class="progress-fill" style="width: 31%;"></div>
+          </div>
+        </div>
+        <div class="monitor-panel">
+          <div class="stat-label">Current Agent</div>
+          <div class="flex-center" style="margin-top: 8px; color: #a78bfa; font-size: 14px; font-weight: 500;">
+            <div style="width: 12px; height: 12px; border-radius: 50%; border: 2px solid #a78bfa; border-top-color: transparent; animation: spin 1s linear infinite;"></div>
+            Auth Vuln
+          </div>
+        </div>
+        <div class="monitor-panel">
+          <div class="stat-label">Elapsed Time</div>
+          <div style="font-size: 28px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums;">1h 47m 22s</div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bar">
+      <button class="btn" style="color: #f87171; background: rgba(239,68,68,0.1); border: none;">&#9632; Stop Run</button>
+      <button class="btn" style="color: #64748b; background: rgba(124,58,237,0.3); border: none; opacity: 0.5;">&#8615; Import Findings</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ========== SCREEN 3: FINDINGS TRIAGE ========== -->
+<div class="screen" id="s2">
+<div class="page">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="icon">S</div>
+      <div><span>Shannon</span><small>Workbench</small></div>
+    </div>
+    <a class="sidebar-link" href="#">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a class="sidebar-link active" href="#">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      Engagements
+    </a>
+  </div>
+  <div class="main" style="display: flex; flex-direction: column; height: 100vh;">
+    <div class="header">
+      <div class="flex-center">
+        <h1>Findings <span style="font-size: 14px; color: #64748b; font-weight: 400; margin-left: 8px;">23</span></h1>
+      </div>
+      <button class="btn btn-primary">+ Add Finding</button>
+    </div>
+    <div class="filter-bar">
+      <span class="filter-label">Severity:</span>
+      <span class="filter-chip active badge-critical"><span class="dot dot-critical"></span> Critical</span>
+      <span class="filter-chip active badge-high"><span class="dot dot-high"></span> High</span>
+      <span class="filter-chip active badge-medium"><span class="dot dot-medium"></span> Medium</span>
+      <span class="filter-chip" style="color: #475569;"><span class="dot" style="background: #334155;"></span> Low</span>
+      <span class="filter-chip" style="color: #475569;"><span class="dot" style="background: #334155;"></span> Info</span>
+      <div class="divider-v"></div>
+      <span class="filter-label">Status:</span>
+      <span class="filter-chip active badge-needs-review">Needs Review</span>
+      <span class="filter-chip active badge-confirmed">Confirmed</span>
+      <div class="divider-v"></div>
+      <span class="filter-label">Source:</span>
+      <span class="filter-chip active" style="background: rgba(124,58,237,0.15); color: #a78bfa;">Shannon</span>
+      <span class="filter-chip" style="color: #475569;">Manual</span>
+    </div>
+    <div class="triage-layout" style="flex: 1; overflow: hidden;">
+      <div class="finding-list">
+        <div class="finding-item selected">
+          <div class="flex-center" style="justify-content: space-between;">
+            <span class="badge badge-critical" style="font-size: 10px;"><span class="dot dot-critical"></span> Critical</span>
+            <span class="mono" style="font-size: 10px; color: #475569;">INJ-VULN-01</span>
+          </div>
+          <div class="finding-title">SQL Injection in Product Search API</div>
+          <div class="finding-meta">injection &middot; shannon</div>
+        </div>
+        <div class="finding-item">
+          <div class="flex-center" style="justify-content: space-between;">
+            <span class="badge badge-critical" style="font-size: 10px;"><span class="dot dot-critical"></span> Critical</span>
+            <span class="mono" style="font-size: 10px; color: #475569;">INJ-VULN-02</span>
+          </div>
+          <div class="finding-title">SQL Injection in User Login Endpoint</div>
+          <div class="finding-meta">injection &middot; shannon</div>
+        </div>
+        <div class="finding-item">
+          <div class="flex-center" style="justify-content: space-between;">
+            <span class="badge badge-critical" style="font-size: 10px;"><span class="dot dot-critical"></span> Critical</span>
+            <span class="mono" style="font-size: 10px; color: #475569;">AUTH-VULN-01</span>
+          </div>
+          <div class="finding-title">JWT Algorithm Confusion (none)</div>
+          <div class="finding-meta">auth &middot; shannon</div>
+        </div>
+        <div class="finding-item">
+          <div class="flex-center" style="justify-content: space-between;">
+            <span class="badge badge-high" style="font-size: 10px;"><span class="dot dot-high"></span> High</span>
+            <span class="mono" style="font-size: 10px; color: #475569;">XSS-VULN-01</span>
+          </div>
+          <div class="finding-title">Reflected XSS via Search Query Parameter</div>
+          <div class="finding-meta">xss &middot; shannon</div>
+        </div>
+        <div class="finding-item">
+          <div class="flex-center" style="justify-content: space-between;">
+            <span class="badge badge-high" style="font-size: 10px;"><span class="dot dot-high"></span> High</span>
+            <span class="mono" style="font-size: 10px; color: #475569;">AUTHZ-VULN-01</span>
+          </div>
+          <div class="finding-title">Horizontal Privilege Escalation via User ID</div>
+          <div class="finding-meta">authz &middot; shannon</div>
+        </div>
+        <div class="finding-item">
+          <div class="flex-center" style="justify-content: space-between;">
+            <span class="badge badge-high" style="font-size: 10px;"><span class="dot dot-high"></span> High</span>
+            <span class="mono" style="font-size: 10px; color: #475569;">AUTH-VULN-02</span>
+          </div>
+          <div class="finding-title">Password Reset Token Leaked in Response</div>
+          <div class="finding-meta">auth &middot; shannon</div>
+        </div>
+        <div class="finding-item">
+          <div class="flex-center" style="justify-content: space-between;">
+            <span class="badge badge-high" style="font-size: 10px;"><span class="dot dot-high"></span> High</span>
+            <span class="mono" style="font-size: 10px; color: #475569;">AUTHZ-VULN-02</span>
+          </div>
+          <div class="finding-title">Admin Panel Accessible Without Authorization</div>
+          <div class="finding-meta">authz &middot; shannon</div>
+        </div>
+        <div class="finding-item">
+          <div class="flex-center" style="justify-content: space-between;">
+            <span class="badge badge-medium" style="font-size: 10px;"><span class="dot dot-medium"></span> Medium</span>
+            <span class="mono" style="font-size: 10px; color: #475569;">SSRF-VULN-01</span>
+          </div>
+          <div class="finding-title">SSRF via Product Image URL Parameter</div>
+          <div class="finding-meta">ssrf &middot; shannon</div>
+        </div>
+        <div class="finding-item">
+          <div class="flex-center" style="justify-content: space-between;">
+            <span class="badge badge-medium" style="font-size: 10px;"><span class="dot dot-medium"></span> Medium</span>
+            <span style="font-size: 10px; color: #475569;">manual</span>
+          </div>
+          <div class="finding-title">Sensitive Data in JWT Payload (user email)</div>
+          <div class="finding-meta">auth &middot; <span style="color: #64748b;">manual</span></div>
+        </div>
+      </div>
+      <div class="detail-panel">
+        <div class="detail-title">SQL Injection in Product Search API</div>
+        <div class="flex-center" style="gap: 10px; margin-bottom: 20px;">
+          <span class="badge badge-critical"><span class="dot dot-critical"></span> Critical</span>
+          <span class="badge badge-confirmed">Confirmed</span>
+          <span class="badge" style="background: #1e293b; color: #94a3b8; border-color: #334155;">injection</span>
+          <span class="badge" style="background: #1e293b; color: #94a3b8; border-color: #334155;">shannon</span>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">Shannon ID</div>
+          <div class="mono" style="font-size: 13px; color: #94a3b8;">INJ-VULN-01</div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">Description</div>
+          <div class="detail-text">The product search endpoint at <code style="background: #1e293b; padding: 2px 6px; border-radius: 4px; font-size: 12px;">/rest/products/search?q=</code> is vulnerable to SQL injection. The search query parameter is concatenated directly into a SQL query without parameterization, allowing an attacker to extract the full SQLite database contents including user credentials, credit card data, and security answers.</div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">Proof of Concept</div>
+          <div class="code-block">GET /rest/products/search?q=qwert'))UNION+SELECT+id,email,password,
+role,'5','6','7','8','9'FROM+Users-- HTTP/1.1
+Host: localhost:3000
+
+Response (200 OK):
+{
+  "status": "success",
+  "data": [
+    {
+      "id": 1,
+      "name": "admin@juice-sh.op",
+      "description": "0192023a7bbd73250516f069df18b500",
+      "price": "admin",
+      ...
+    },
+    {
+      "id": 2,
+      "name": "jim@juice-sh.op",
+      "description": "e541f8ef8e710...",
+      ...
+    }
+  ]
+}</div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">Code Location</div>
+          <div class="mono" style="font-size: 13px; color: #94a3b8; background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 10px;">routes/search.ts:28</div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">Remediation</div>
+          <div class="detail-text">Replace string concatenation with parameterized queries using Sequelize's built-in query binding. The vulnerable pattern <code style="background: #1e293b; padding: 2px 6px; border-radius: 4px; font-size: 12px;">models.sequelize.query("SELECT ... '" + criteria + "'")</code> should use <code style="background: #1e293b; padding: 2px 6px; border-radius: 4px; font-size: 12px;">models.sequelize.query("SELECT ... ?", { replacements: [criteria] })</code></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">Tester Notes</div>
+          <div class="detail-text" style="color: #64748b; font-style: italic;">Verified manually. Full database dump possible including password hashes (MD5, unsalted). Also works via the Angular search bar on the frontend. CVSS 9.8 confirmed.</div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">CVSS Score</div>
+          <div style="font-size: 14px; font-weight: 600; color: #f87171;">9.8</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ========== SCREEN 4: EXPORT ========== -->
+<div class="screen" id="s3">
+<div class="page">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="icon">S</div>
+      <div><span>Shannon</span><small>Workbench</small></div>
+    </div>
+    <a class="sidebar-link" href="#">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a class="sidebar-link active" href="#">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      Engagements
+    </a>
+  </div>
+  <div class="main">
+    <div class="header">
+      <h1>Export Findings</h1>
+      <div class="flex-center" style="gap: 8px;">
+        <button class="btn btn-ghost">&#128203; Copy</button>
+        <button class="btn btn-primary">&#8615; Download JSON</button>
+      </div>
+    </div>
+    <div class="export-section">
+      <div class="monitor-panel">
+        <h2 style="font-size: 14px; font-weight: 500; margin-bottom: 12px;">Include Statuses</h2>
+        <div class="checkbox-row">
+          <label><input type="checkbox" checked> Confirmed</label>
+          <label><input type="checkbox"> Dismissed</label>
+          <label><input type="checkbox" checked> Needs Review</label>
+          <label><input type="checkbox"> Needs More Testing</label>
+        </div>
+      </div>
+
+      <div class="monitor-panel">
+        <h2 style="font-size: 14px; font-weight: 500; margin-bottom: 12px;">Summary</h2>
+        <div class="flex-center" style="gap: 16px; flex-wrap: wrap;">
+          <span style="font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums;">19</span>
+          <span style="font-size: 13px; color: #64748b;">findings</span>
+          <span class="badge badge-critical"><span class="dot dot-critical"></span> 3 Critical</span>
+          <span class="badge badge-high"><span class="dot dot-high"></span> 5 High</span>
+          <span class="badge badge-medium"><span class="dot dot-medium"></span> 6 Medium</span>
+          <span class="badge badge-low"><span class="dot dot-low"></span> 3 Low</span>
+          <span class="badge badge-info"><span class="dot dot-info"></span> 2 Info</span>
+        </div>
+        <div class="flex-center" style="gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+          <span class="badge" style="background: #1e293b; color: #94a3b8; border-color: #334155;">7 injection</span>
+          <span class="badge" style="background: #1e293b; color: #94a3b8; border-color: #334155;">4 xss</span>
+          <span class="badge" style="background: #1e293b; color: #94a3b8; border-color: #334155;">4 auth</span>
+          <span class="badge" style="background: #1e293b; color: #94a3b8; border-color: #334155;">2 ssrf</span>
+          <span class="badge" style="background: #1e293b; color: #94a3b8; border-color: #334155;">2 authz</span>
+        </div>
+      </div>
+
+      <div class="json-preview">
+        <div class="json-header">JSON Preview</div>
+        <div class="json-body">{
+  "export_version": "1.0",
+  "generated_at": "2026-04-15T22:14:33.000Z",
+  "engagement": {
+    "id": "cmo0krhuk00003tm5uz1j7f5h",
+    "name": "Juice Shop Pentest",
+    "client_name": "OWASP Foundation",
+    "target_url": "http://host.docker.internal:3000/"
+  },
+  "run": {
+    "workflow_id": "js-pentest_shannon-1776275402052",
+    "started_at": "2026-04-15T14:30:04.000Z",
+    "completed_at": "2026-04-15T17:42:08.000Z",
+    "total_cost_usd": 35.94,
+    "total_duration_ms": 11273555
+  },
+  "findings": [
+    {
+      "id": "cm98xk2v00001...",
+      "shannon_id": "INJ-VULN-01",
+      "source": "shannon",
+      "category": "injection",
+      "title": "SQL Injection in Product Search API",
+      "severity": "critical",
+      "status": "confirmed",
+      "description": "The product search endpoint at /rest/products/search?q= is vulnerable...",
+      "poc": "GET /rest/products/search?q=qwert'))UNION+SELECT...",
+      "code_location": "routes/search.ts:28",
+      "remediation": "Replace string concatenation with parameterized queries...",
+      "tester_notes": "Verified manually. Full database dump possible...",
+      "cvss": 9.8
+    },
+    ...
+  ],
+  "summary": {
+    "total_findings": 19,
+    "confirmed": 14,
+    "needs_review": 5,
+    "by_severity": { "critical": 3, "high": 5, "medium": 6, "low": 3, "info": 2 },
+    "by_category": { "injection": 7, "xss": 4, "auth": 4, "ssrf": 2, "authz": 2 }
+  }
+}</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+<script>
+function show(n) {
+  document.querySelectorAll('.screen').forEach((s, i) => {
+    s.classList.toggle('active', i === n);
+  });
+  document.querySelectorAll('.screen-nav button').forEach((b, i) => {
+    b.classList.toggle('active', i === n);
+  });
+}
+</script>
+</body>
+</html>
